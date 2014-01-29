@@ -1,1 +1,1 @@
-KILL leetcode
+kill -9 leetcode
