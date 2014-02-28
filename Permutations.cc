@@ -1,7 +1,6 @@
 //Given a collection of numbers, return all possible permutations.
 
 #include <vector>
-#include <algorithm>
 #include <iostream>
 
 using namespace std;
@@ -23,16 +22,15 @@ public:
 				vector<int> v(ans);
 				v.push_back(n);
 				ret.push_back(v);
-				int l = find(ans.begin(), ans.end(), n) - ans.begin();
-				if (l == i) {
-					l = 0;
+				auto it = ans.rbegin();
+				while (it != ans.rend() && *it != n) {
+					++ it;
 				}
-				for (int k = i; k != l; -- k) {
-					if (ans[k - 1] != n) {
-						v.assign(ans.begin(), ans.end());
-						v.insert(v.begin() + k - 1, n);
-						ret.push_back(v);
-					}
+				int l = ans.rend() - it;
+				for (int k = i - 1; k >= l; -- k) {
+					v.assign(ans.begin(), ans.end());
+					v.insert(v.begin() + k, n);
+					ret.push_back(v);
 				}
 			}
 			ret.erase(ret.begin(), ret.begin() + c);
