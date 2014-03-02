@@ -13,7 +13,7 @@ public:
 			return 0;
 		}
 		int count = 0, pos = 0, i = 0;
-		char last = A[0];
+		int last = A[0];
 		for (int i = 0; i < n; ++ i) {
 			if (A[i] == last) {
 				++ count;
