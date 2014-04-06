@@ -9,36 +9,24 @@ using namespace std;
 class Solution {
 public:
 	int largestRectangleArea(vector<int> &height) {
-		if (!height.size()) {
-			return 0;
-		}
-		int max = 0, t;
-		vector<int> h(height);
 		stack<int> s;
-		for (int i = 0; i != h.size(); ++ i) {
-			if (s.empty() || h[s.top()] <= h[i]) {
+		int max = 0, tmp, i = 0, n = height.size();
+		while (i < n) {
+			if (s.empty() || height[s.top()] <= height[i]) {
 				s.push(i);
+				++ i;
 			} else {
-				int first;
-				while (!s.empty() && h[s.top()] > h[i]) {
-					t = h[s.top()] * (i - s.top());
-					max = t > max ? t : max;
-					first = s.top();
-					s.pop();
-				}
-				if (s.empty()) {
-					first = 0;
-				}
-				h[first] = h[i];
-				s.push(first);
-				s.push(i);
+				tmp = s.top();
+				s.pop();
+				tmp = height[tmp] * (s.empty() ? i : i - s.top() - 1);
+				max = tmp > max ? tmp : max;
 			}
 		}
-		int last = s.top();
 		while (!s.empty()) {
-			t = h[s.top()] * (last - s.top() + 1);
-			max = t > max ? t : max;
+			tmp = s.top();
 			s.pop();
+			tmp = height[tmp] * (s.empty() ? i : i - s.top() - 1);
+			max = tmp > max ? tmp : max;
 		}
 		return max;
 	}
