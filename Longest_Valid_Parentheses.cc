@@ -11,82 +11,40 @@ using namespace std;
 class Solution {
 public:
 	int longestValidParentheses(string s) {
-		stack<pair<int, int> > seq;
-		int last = 0, max = 0, i;
-		for (auto it = s.begin(); it != s.end(); ++ it) {
-			i = (*it == '(' ? 1 : -1);
-			if (last == 0) {
-				last = i;
-			} else if (last * i > 0) {
-				last += i;
-			} else {
-				pair<int, int> p = make_pair(-i, -i * last);
-				last = i;
-				int k = handle(seq, p);
-				if (k > max) {
-					max = k;
-				}
-			}
-		}
-		pair<int, int> p = make_pair(i, i * last);
-		int k = handle(seq, p);
-		return max > k ? max : k;
-	}
-	int handle(stack<pair<int, int> > &seq, pair<int, int> p) {
-		if (!seq.size() && p.first == -1) {
-			return 0;
-		}
-		if (p.first == 1) {
-			seq.push(p);
-			return 0;
-		}
-		int c = 0;
-		while (seq.size()) {
-			pair<int, int> q = seq.top();
-			if (q.first == 0) {
-				seq.pop();
-				c += q.second;
-			} else if (q.first == -1) {
-				if (c > 0) {
-					seq.push(make_pair(0, c));
-					seq.push(p);
+		stack<int> st;
+		vector<pair<int, int>> interval;
+		int left, right;
+		for (int i = 0; i != s.length(); ++ i) {
+			if (s[i] == '(') {
+				st.push(i);
+			} else if (!st.empty()) {
+				left = st.top();
+				right = i;
+				if (interval.empty()) {
+					interval.push_back(make_pair(left, right));
 				} else {
-					seq.pop();
-					seq.push(make_pair(-1, q.second + p.second));
-				}
-				return c;
-			} else {
-				seq.pop();
-				if (q.second < p.second) {
-					c += 2 * q.second;
-					p.second -= q.second;
-				} else if (q.second > p.second) {
-					c += 2 * p.second;
-					seq.push(make_pair(1, q.second - p.second));
-					seq.push(make_pair(0, c));
-					return c;
-				} else {
-					c += 2 * p.second;
-					if (seq.size() == 0) {
-						seq.push(make_pair(0, c));
-						return c;
-					} else {
-						pair<int, int> r = seq.top();
-						if (r.first == 0) {
-							seq.pop();
-							c += r.second;
-							seq.push(make_pair(0, c));
+					if (left == interval.back().first - 1) {
+						interval.pop_back();
+						if (!interval.empty() && interval.back().second == left - 1) {
+							interval.back().second = right;
 						} else {
-							seq.push(make_pair(0, c));
+							interval.push_back(make_pair(left, right));
 						}
-						return c;
+					} else if (left == interval.back().second + 1) {
+						interval.back().second += 2;
+					} else if (left > interval.back().second + 1) {
+						interval.push_back(make_pair(left, right));
 					}
 				}
+				st.pop();
 			}
 		}
-		seq.push(make_pair(0, c));
-		seq.push(p);
-		return c;
+		int max = 0, t;
+		for (auto it = interval.begin(); it != interval.end(); ++ it) {
+			t = it->second - it->first + 1;
+			max = t > max ? t : max;
+		}
+		return max;
 	}
 };
 
@@ -94,7 +52,7 @@ int main() {
 	Solution sol = Solution();
 	string s;
 	while (cin >> s) {
-		cout << sol.longestValidParentheses(s) << "#" << s.length() << endl;
+		cout << s.length() << "#" << sol.longestValidParentheses(s) << endl;
 	}
 	return 0;
 }
