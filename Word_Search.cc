@@ -2,6 +2,7 @@
 //The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once.
 
 #include <vector>
+#include <unordered_map>
 #include <utility>
 #include <stack>
 #include <iostream>
@@ -11,6 +12,9 @@ using namespace std;
 class Solution {
 public:
 	bool exist(vector<vector<char> > &board, string word) {
+		if (word.length() == 0) {
+			return true;
+		}
 		int m = board.size();
 		if (m == 0) {
 			return false;
@@ -19,10 +23,93 @@ public:
 		if (n == 0) {
 			return false;
 		}
-		vector<vector<bool>> path(m, vector<bool>(n, false));
-		stack<pair<int, int>> st;
-		int start = 0, startX, startY, lastX, lastY, pos = 0;
-		while (1) {
+		//Up : 0, Down : 1, Left : 2, Right : 3
+		vector<vector<vector<int>>> way(m * n, vector<vector<int>>(word.length(), vector<int>(4, 0)));
+		unordered_map<string, vector<int>> step;
+		vector<bool> visited(m * n, false);
+		stack<int> path;
+		string s("00");
+		for (int i = 0; i != word.length() - 1; ++ i) {
+			step[word.substr(i, 2)].push_back(i);
+		}
+		for (int k = 0; k != m * n; ++ k) {
+			int i = k / n;
+			int j = k % n;
+			s[0] = board[i][j];
+			vector<pair<string, int>> edge;
+			if (i != 0) {
+				s[1] = board[i - 1][j];
+				edge.push_back(make_pair(s, 0));
+			}
+			if (i != m - 1) {
+				s[1] = board[i + 1][j];
+				edge.push_back(make_pair(s, 1));
+			}
+			if (j != 0) {
+				s[1] = board[i][j - 1];
+				edge.push_back(make_pair(s, 2));
+			}
+			if (j != n - 1) {
+				s[1] = board[i][j + 1];
+				edge.push_back(make_pair(s, 3));
+			}
+			for (auto u = edge.begin(); u != edge.end(); ++ u) {
+				for (auto it = step[u->first].begin(); it != step[u->first].end(); ++ it) {
+					way[k][*it][u->second] = 1;
+				}
+			}
+		}
+		int start = 0, pos = 0, last;
+		while (start != m * n) {
+			for (; start != m * n; ++ start) {
+				if (board[start / n][start % n] == word[0]) {
+					break;
+				}
+			}
+			if (start == m * n) {
+				break;
+			}
+			visited[start] = true;
+			path.push(start);
+			pos = 1;
+			while (!path.empty() && pos != word.length()) {
+				last = path.top();
+				if (way[last][pos - 1][0] && !visited[last - n]) {
+					way[last][pos - 1][0] = 0;
+					++ pos;
+					visited[last - n] = true;
+					path.push(last - n);
+					continue;
+				}
+				if (way[last][pos - 1][1] && !visited[last + n]) {
+					way[last][pos - 1][1] = 0;
+					++ pos;
+					visited[last + n] = true;
+					path.push(last + n);
+					continue;
+				}
+				if (way[last][pos - 1][2] && !visited[last - 1]) {
+					way[last][pos - 1][2] = 0;
+					++ pos;
+					visited[last - 1] = true;
+					path.push(last - 1);
+					continue;
+				}
+				if (way[last][pos - 1][3] && !visited[last + 1]) {
+					way[last][pos - 1][3] = 0;
+					++ pos;
+					visited[last + 1] = true;
+					path.push(last + 1);
+					continue;
+				}
+				path.pop();
+				-- pos;
+				visited[last] = false;
+			}
+			if (pos == word.length()) {
+				return true;
+			}
+			++ start;
 		}
 		return false;
 	}
